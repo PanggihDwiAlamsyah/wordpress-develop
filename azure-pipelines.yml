@@ -1,0 +1,29 @@
+trigger:
+- trunk   # branch utama
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+# 1. Archive WordPress source
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'src'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/wordpress.zip'
+    replaceExistingArchive: true
+
+# 2. Publish artifact
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+# 3. Deploy ke Azure Web App
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: '<Your-Service-Connection-Name>'
+    appName: 'webwppanggih'
+    package: '$(Build.ArtifactStagingDirectory)/wordpress.zip'
